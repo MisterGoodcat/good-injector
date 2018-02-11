@@ -10,6 +10,16 @@ An opinionated dependency injector container written in TypeScript for TypeScrip
 
 ## Usage
 
+Install:
+
+```
+yarn add good-injector
+
+or 
+
+npm install good-injector
+```
+
 Create a container and register type mappings with it. Use the container later to resolve mapped types, including all of their dependency chain. Make sure target types are decorated with the included `SupportsInjection` decorator.
 
 ```ts
@@ -65,8 +75,10 @@ public scopeTest4() {
 
 ## Build yourself
 
-* Clone
-* CMD: yarn
-* CMD: npm run build:dev
+Make sure you have ts-node globally installed for executing the unit tests.
+
+* Clone repo
+* `yarn`
+* `npm run build:dev`
 
 Look at the available scripts to see what's available to build, lint, test and watch.
