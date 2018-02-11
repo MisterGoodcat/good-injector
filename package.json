@@ -15,8 +15,8 @@
   "bugs": {
     "url": "https://github.com/MisterGoodcat/good-injector/issues"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/Index.js",
+  "types": "dist/Index.d.ts",
   "scripts": {
     "clean:dist": "rimraf ./dist/**/*.*",
     "compile:src": "tsc -p ./tsconfig.json",
