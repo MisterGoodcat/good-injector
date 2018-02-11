@@ -48,27 +48,45 @@ export class Container {
     private _parameterTypes: Map<Function, any[]> = new Map<Function, any[]>();
     private _providers: Map<Function, IRegistration> = new Map<Function, IRegistration>();
 
-    public registerTransient<From, To extends From>(from: Constructor<From>, to: IConcreteConstructor<To>): void {
-        this.register(from, to, new TransientRegistration<To>(to));
-    }
-
-    public registerSingleton<From, To extends From>(from: Constructor<From>, to: IConcreteConstructor<To>): void {
-        this.register(from, to, new SingletonRegistration<To>(to));
-    }
-
-    public resolve<T>(from: Constructor<T>): T {
-        const registration = this._providers.get(from) as ITypedRegistration<T>;
-        if (registration == undefined) {
-            throw new Error(`No registration found for type '${from.name}'`);
+    public registerTransient<T>(self: IConcreteConstructor<T>): void;
+    public registerTransient<From, To extends From>(when: Constructor<From>, then: IConcreteConstructor<To>): void;
+    public registerTransient<From, To extends From>(when: Constructor<From> | IConcreteConstructor<From>, then?: IConcreteConstructor<To>): void {
+        if (then == undefined) {
+            // the reason we can safely do this type case here is that there are only two overloads;
+            // the one overload that has no second argument (no "to") ensures that the first one is IConcreteConstructor<T>
+            // also: From extends From === true
+            then = when as IConcreteConstructor<To>;
         }
 
-        return registration.resolve((type) => this.createArgs(type));
+        this.register(when, then, new TransientRegistration<To>(then));
     }
 
-    private register<From, To extends From>(from: Constructor<From>, to: IConcreteConstructor<To>, registration: IRegistration): void {
-        const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", to);
-        this._parameterTypes.set(to, paramTypes);
-        this._providers.set(from, registration);
+    public registerSingleton<T>(self: IConcreteConstructor<T>): void;
+    public registerSingleton<From, To extends From>(when: Constructor<From>, then: IConcreteConstructor<To>): void;
+    public registerSingleton<From, To extends From>(when: Constructor<From> | IConcreteConstructor<From>, then?: IConcreteConstructor<To>): void {
+        if (then == undefined) {
+            // the reason we can safely do this type case here is that there are only two overloads;
+            // the one overload that has no second argument (no "to") ensures that the first one is IConcreteConstructor<T>
+            // also: From extends From === true
+            then = when as IConcreteConstructor<To>;
+        }
+
+        this.register(when, then, new SingletonRegistration<To>(then));
+    }
+
+    public resolve<T>(type: Constructor<T>): T {
+        const registration = this._providers.get(type) as ITypedRegistration<T>;
+        if (registration == undefined) {
+            throw new Error(`No registration found for type '${type.name}'`);
+        }
+
+        return registration.resolve((toResolve) => this.createArgs(toResolve));
+    }
+
+    private register<From, To extends From>(when: Constructor<From>, then: IConcreteConstructor<To>, registration: IRegistration): void {
+        const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", then);
+        this._parameterTypes.set(then, paramTypes);
+        this._providers.set(when, registration);
     }
 
     private createArgs<T>(type: IConcreteConstructor<T>): any[] {

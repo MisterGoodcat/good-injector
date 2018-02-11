@@ -33,7 +33,7 @@ export class LoggerSamplesTests {
 
       let container = new Container();
       container.registerTransient(Logger, ConsoleLoggerWithDependency);
-      container.registerTransient(Tool, Tool);
+      container.registerTransient(Tool);
 
       let logger = container.resolve(Logger);      
       let testMethodResult = (<ConsoleLoggerWithDependency>logger).testMethod(); // uses injected "Tool" internally
