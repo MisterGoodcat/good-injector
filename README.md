@@ -20,7 +20,8 @@ let container = new Container();
 container.registerTransient(Logger, ConsoleLogger);
 
 // map types to themselves so the container can resolve them and their dependencies
-container.registerTransient(MyCustomType, MyCustomType);
+// compiler complains if MyCustomType cannot be constructed
+container.registerTransient(MyCustomType);
 
 // for successful resolution, MyCustomType must be decorated with injection support
 @SupportsInjection
@@ -39,8 +40,8 @@ Use singleton registration if required:
 @Test("resolving transient parent with singleton child gets same child instance every time")
 public scopeTest4() {      
     let container = new Container();        
-    container.registerTransient(Parent, Parent);
-    container.registerSingleton(Child, Child);
+    container.registerTransient(Parent);
+    container.registerSingleton(Child);
     
     let parent1 = container.resolve(Parent);
     let parent2 = container.resolve(Parent);
