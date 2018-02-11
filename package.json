@@ -1,6 +1,6 @@
 {
   "name": "good-injector",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "An opinionated dependency injector container written in TypeScript for TypeScript developers.",
   "keywords": [
     "Dependency Injection",
