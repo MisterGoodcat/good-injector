@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "lib": [ "dom", "es5", "es2015" ],
-    "outDir": "../tests-out",
+    "noEmit": true,
     "strict": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,

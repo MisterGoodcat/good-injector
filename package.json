@@ -19,19 +19,15 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean:dist": "rimraf ./dist/**/*.*",
-    "clean:tests-out": "rimraf ./tests-out/**/*.*",
     "compile:src": "tsc -p ./tsconfig.json",
-    "compile:tests": "tsc -p ./tests/tsconfig.json",
     "lint:dev": "tslint --force --format stylish ./src/**/*.ts",
     "lint:prod": "tslint --format stylish ./src/**/*.ts",
     "lint-fix:dev": "tslint --fix --format stylish ./src/**/*.ts",
-    "alsatian:dev": "alsatian --tap ./tests-out/**/*.spec.js",
-    "alsatian:prod": "alsatian ./tests-out/**/*.spec.js",
-    "build:dev": "npm run clean:dist && npm run clean:tests-out && npm run compile:src && npm run lint:dev && npm run compile:tests && npm run alsatian:dev",
-    "build:prod": "npm run clean:dist && npm run clean:tests-out && npm run compile:src && npm run lint:prod && npm run compile:tests && npm run alsatian:prod",
-    "test:dev": "npm run clean:tests-out && npm run compile:tests && npm run alsatian:dev",
+    "build:dev": "npm run clean:dist && npm run compile:src && npm run lint:dev && npm run test",
+    "build:prod": "npm run clean:dist && npm run compile:src && npm run lint:prod && npm run test",
+    "test": "ts-node --project ./tests/tsconfig.json ./tests/Runner.ts",
     "watch:dev": "tsc-watch -p ./tsconfig.json --onSuccess \"npm run lint:dev\"",
-    "watch:tests": "tsc-watch -p ./tests/tsconfig.json --onSuccess \"npm run alsatian:dev\""
+    "watch:tests": "tsc-watch -p ./tests/tsconfig.json --onSuccess \"npm run test\""
   },
   "author": "Peter Kuhn",
   "license": "MIT",
