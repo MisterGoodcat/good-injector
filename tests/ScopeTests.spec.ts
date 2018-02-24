@@ -70,4 +70,29 @@ export class ScopeTests {
         Expect(parent1.child).toBeDefined();
         Expect(parent1.child).toEqual(parent2.child);
     }
+
+    @Test("resolving registered instance should get the original instance")
+    public scopeTest6() {
+        let container = new Container();
+        
+        let instance = new Child();
+        container.registerInstance(Child, instance);
+
+        let child1 = container.resolve(Child);
+
+        Expect(child1).toEqual(instance);
+    }
+
+    @Test("resolving registered instance should get the same instance every time")
+    public scopeTest7() {
+        let container = new Container();
+        
+        let instance = new Child();
+        container.registerInstance(Child, instance);
+
+        let child1 = container.resolve(Child);
+        let child2 = container.resolve(Child);
+
+        Expect(child1).toEqual(child2);
+    }
 }

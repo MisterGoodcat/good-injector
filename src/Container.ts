@@ -44,6 +44,15 @@ class SingletonRegistration<T> implements ITypedRegistration<T> {
     }
 }
 
+class InstanceRegistration<T> implements ITypedRegistration<T> {
+    constructor(private _instance: T) {        
+    }
+
+    public resolve(argumentBuilder: (type: IConcreteConstructor<T>) => any[]): T {
+        return this._instance;
+    }
+}
+
 export class Container {
     private _parameterTypes: Map<Function, any[]> = new Map<Function, any[]>();
     private _providers: Map<Function, IRegistration> = new Map<Function, IRegistration>();
@@ -51,6 +60,10 @@ export class Container {
     public registerTransient<T>(self: IConcreteConstructor<T>): void;
     public registerTransient<From, To extends From>(when: Constructor<From>, then: IConcreteConstructor<To>): void;
     public registerTransient<From, To extends From>(when: Constructor<From> | IConcreteConstructor<From>, then?: IConcreteConstructor<To>): void {
+        if (when == undefined) {
+            throw new Error(`Cannot register null or undefined as transient. Did you intend to call unregister?`);
+        }
+
         if (then == undefined) {
             // the reason we can safely do this type case here is that there are only two overloads;
             // the one overload that has no second argument (no "to") ensures that the first one is IConcreteConstructor<T>
@@ -64,6 +77,10 @@ export class Container {
     public registerSingleton<T>(self: IConcreteConstructor<T>): void;
     public registerSingleton<From, To extends From>(when: Constructor<From>, then: IConcreteConstructor<To>): void;
     public registerSingleton<From, To extends From>(when: Constructor<From> | IConcreteConstructor<From>, then?: IConcreteConstructor<To>): void {
+        if (when == undefined) {
+            throw new Error(`Cannot register null or undefined as singleton. Did you intend to call unregister?`);
+        }
+
         if (then == undefined) {
             // the reason we can safely do this type case here is that there are only two overloads;
             // the one overload that has no second argument (no "to") ensures that the first one is IConcreteConstructor<T>
@@ -74,7 +91,32 @@ export class Container {
         this.register(when, then, new SingletonRegistration<To>(then));
     }
 
+    public registerInstance<T>(when: Constructor<T>, then: T): void {
+        if (then == undefined) {
+            throw new Error(`Cannot register null or undefined as instance. Did you intend to call unregister?`);
+        }
+        
+        this._providers.set(when, new InstanceRegistration<T>(then));
+    }
+
+    public unregister<T>(type: Constructor<T>): void {
+        if (type == undefined) {
+            throw new Error(`Cannot unregister null or undefined type`);
+        }
+
+        const registration = this._providers.get(type);
+        if (registration == undefined) {
+            return;
+        }
+
+        this._providers.delete(type);
+    }
+
     public resolve<T>(type: Constructor<T>): T {
+        if (type == undefined) {
+            throw new Error(`Cannot resolve null or undefined type`);
+        }
+
         const registration = this._providers.get(type) as ITypedRegistration<T>;
         if (registration == undefined) {
             throw new Error(`No registration found for type '${type.name}'`);
