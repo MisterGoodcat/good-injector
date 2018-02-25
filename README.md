@@ -6,7 +6,7 @@ An opinionated dependency injector container written in TypeScript for TypeScrip
 * Highly opinionated. Only supports abstract or concrete types mapped to their implementations (including themselves).
 * Type-safe with a good amount of compiler support (no magic strings, no convention based approach).
 * Strict and explicit, meaning no silent fails or unexpected outcome for misconfigurations, no intransparent black magic.
-* Supported scope kinds for type registrations: transient, singleton, instance, and factory functions.
+* Supported scope kinds for type registrations: transient, singleton, instance, and factory functions (singleton/custom).
 
 ## Usage
 
@@ -105,7 +105,27 @@ public scopeTest10() {
 }
 ```
 
-You can unregister registrations also. Use case, for example: passing around data across a sub-system of your application, and removing it once that sub-system is left, or a workflow has been finished etc.
+You can also use singleton factories. This allows complex creation of singletons without the need to handle the lifetime logic yourself.
+
+```ts
+@Test("resolving registered as singleton factory should return the same result every time")
+public scopeTest16() {
+    let container = new Container();
+
+    // explicitly create new instance, but should only be called once later
+    let factory = () => new Child();
+
+    container.registerSingletonFactory(Child, factory);
+    let child1 = container.resolve(Child);
+    let child2 = container.resolve(Child);
+    let child3 = container.resolve(Child);
+
+    Expect(child1).toEqual(child2);
+    Expect(child1).toEqual(child3);
+}
+```
+
+You can unregister registrations. Use case, for example: passing around data across a sub-system of your application, and removing it once that sub-system is left, or a workflow has been finished etc.
 
 ```ts
 @Test("when registered as instance and unregistered, it should throw on resolve")
