@@ -185,4 +185,49 @@ export class ScopeTests {
         
         Expect(resolvedChild instanceof DerivedDerivedChild).toBe(true);   
     }
+    
+    @Test("resolving registered as singleton factory should use the factory")
+    public scopeTest14() {
+        let container = new Container();
+        let wasCalled = false;
+
+        let factory = () => {
+            wasCalled = true;
+            return new Child();
+        };
+
+        container.registerSingletonFactory(Child, factory);
+        let child = container.resolve(Child);
+
+        Expect(wasCalled).toBe(true);
+    }
+
+    @Test("resolving registered as singleton factory should return the factory result")
+    public scopeTest15() {
+        let container = new Container();
+        let child = new Child();
+
+        let factory = () => child;
+
+        container.registerSingletonFactory(Child, factory);
+        let child1 = container.resolve(Child);
+
+        Expect(child1).toEqual(child);
+    }
+
+    @Test("resolving registered as singleton factory should return the same result every time")
+    public scopeTest16() {
+        let container = new Container();
+
+        // explicitly create new instance, but should only be called once later
+        let factory = () => new Child();
+
+        container.registerSingletonFactory(Child, factory);
+        let child1 = container.resolve(Child);
+        let child2 = container.resolve(Child);
+        let child3 = container.resolve(Child);
+
+        Expect(child1).toEqual(child2);
+        Expect(child1).toEqual(child3);
+    }
 }

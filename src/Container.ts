@@ -63,6 +63,22 @@ class FactoryRegistration<T> implements ITypedRegistration<T> {
     }
 }
 
+class SingletonFactoryRegistration<T> implements ITypedRegistration<T> {
+    private _instance: T | undefined;
+
+    constructor(private _factory: FactoryFunction<T>) {        
+    }
+
+    public resolve(argumentBuilder: (type: IConcreteConstructor<T>) => any[]): T {
+        if (this._instance != undefined) {
+            return this._instance;
+        }
+
+        this._instance = this._factory();
+        return this._instance;
+    }
+}
+
 export class Container {
     private _parameterTypes: Map<Function, any[]> = new Map<Function, any[]>();
     private _providers: Map<Function, IRegistration> = new Map<Function, IRegistration>();
@@ -121,6 +137,14 @@ export class Container {
         }
 
         this._providers.set(when, new FactoryRegistration<T>(then));
+    }
+
+    public registerSingletonFactory<T>(when: Constructor<T>, then: FactoryFunction<T>) {
+        if (then == undefined) {
+            throw new Error(`Cannot register null or undefined as singleton factory. Did you intend to call unregister?`);
+        }
+
+        this._providers.set(when, new SingletonFactoryRegistration<T>(then));
     }
 
     public unregister<T>(type: Constructor<T>): void {

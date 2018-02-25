@@ -40,4 +40,13 @@ export class ScopeTests {
                 
         Expect(() => container.resolve(Child)).toThrow();
     }
+
+    @Test("when registered as singleton factory and unregistered, it should throw on resolve")
+    public scopeTest5() {
+        let container = new Container();
+        container.registerSingletonFactory(Child, () => new Child());
+        container.unregister(Child);
+                
+        Expect(() => container.resolve(Child)).toThrow();
+    }
 }
