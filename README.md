@@ -6,7 +6,7 @@ An opinionated dependency injector container written in TypeScript for TypeScrip
 * Highly opinionated. Only supports abstract or concrete types mapped to their implementations (including themselves).
 * Type-safe with a good amount of compiler support (no magic strings, no convention based approach).
 * Strict and explicit, meaning no silent fails or unexpected outcome for misconfigurations, no intransparent black magic.
-* Supported scope kinds for type registrations: transient, singleton, and instance.
+* Supported scope kinds for type registrations: transient, singleton, instance, and factory functions.
 
 ## Usage
 
@@ -78,6 +78,33 @@ public scopeTest6() {
 }
 ```
 
+Register resolution strategies with factory functions. This allows you to apply any complex logic for resolving instances that are beyond the scope of the container:
+
+```ts
+@Test("resolving registered by factory should return the factory result")
+public scopeTest10() {
+    let container = new Container();
+    let child1 = new Child();
+    let child2 = new Child();
+    let flip = false;
+
+    let factory = () => {
+        flip = !flip;
+        return flip ? child1 : child2;
+    };
+
+    container.registerFactory(Child, factory);
+    let returnedChild1 = container.resolve(Child);
+    let returnedChild2 = container.resolve(Child);
+    let returnedChild3 = container.resolve(Child);
+
+    Expect(returnedChild1).not.toEqual(returnedChild2);
+    Expect(returnedChild1).toEqual(returnedChild3);
+    Expect(returnedChild1).toEqual(child1);
+    Expect(returnedChild2).toEqual(child2);
+}
+```
+
 You can unregister registrations also. Use case, for example: passing around data across a sub-system of your application, and removing it once that sub-system is left, or a workflow has been finished etc.
 
 ```ts
@@ -99,7 +126,7 @@ public scopeTest3() {
 
 * ~~Create an adapter for Vue.js.~~ See [good-injector-vue](https://github.com/MisterGoodcat/good-injector-vue) for the Vue.js adapter!
 * Make the decorator register which types have been decorated. At the moment, with "reflect-metadata" you can't distinguish between "has been decorated and emitting metadata was not required" and "has not been decorated". This means that it's not possible to test whether someone has forgotton to decorate or if the correctly decorated type has not constructor arguments. This can be solved by registering decorated types by the decorator itself, and then tighten up the resolve implementation.
-* Adding more registration scopes, in particular for ~~existing instances~~ (done!) ~~and~~ factories. Both are valid use cases, to add things to the container you received from elsewhere, or to resolve types based on criteria that is out of scope for the container.
+* ~~Adding more registration scopes, in particular for existing instances and factories. Both are valid use cases, to add things to the container you received from elsewhere, or to resolve types based on criteria that is out of scope for the container.~~ Instance and factory function registrations have been added for version 0.2.0!
 * Passing through arguments during resolution. This is a use case that came up a lot in the past, i.e. you want to resolve the dependencies of a type but there's one or more additional dynamic arguments that you need to pass on to the resolved type. A pattern to work around this is to use factories that set properties or call initialization methods on the resolved type. But it may be nice to have something like this built-in.
 
 ## Build yourself
