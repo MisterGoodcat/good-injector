@@ -2,6 +2,8 @@ import { Container } from "../src/Index";
 import { AsyncTest, Expect, Test, TestCase, TestFixture } from "alsatian";
 import { Child } from "./samples/scope/Child";
 import { Parent } from "./samples/scope/Parent";
+import { DerivedChild } from "./samples/scope/DerivedChild";
+import { DerivedDerivedChild } from "./samples/scope/DerivedDerivedChild";
 
 @TestFixture("Scope tests")
 export class ScopeTests {
@@ -146,5 +148,41 @@ export class ScopeTests {
         Expect(returnedChild1).toEqual(returnedChild3);
         Expect(returnedChild1).toEqual(child1);
         Expect(returnedChild2).toEqual(child2);
+    }
+
+    @Test("registering a type-compatible factory as instance should result in an error")
+    public scopeTest11() {
+        // explanation: the TypeScript compiler compares members to determine type compatibility on generics. This means that for simple types,
+        // with specific members like "name" that can be found also on functions, type inference allows to pass in wrong types (see example "Child" below!)
+        // => we can account for some of these cases by checking the type at runtime and throw
+        // for more details, see: https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-astring-assignable-to-anumber-for-interface-at--
+        let container = new Container();
+        
+        let factory = () => new Child();
+
+        // note: wrongly used "registerInstance" instead of "registerFactory" here (-> i.e. typo)
+        Expect(() => container.registerInstance(Child, factory)).toThrow();
+    }
+
+    @Test("registering a derived type as instance should resolve correctly")
+    public scopeTest12() {
+        // this test is to make sure the runtime check tested by scopeTest11 does not break inheritance
+        let container = new Container();        
+        container.registerInstance(Child, new DerivedChild());
+
+        let resolvedChild = container.resolve(Child);
+        
+        Expect(resolvedChild instanceof DerivedChild).toBe(true);   
+    }
+
+    @Test("registering a type derived from a derviced type as instance should resolve correctly")
+    public scopeTest13() {
+        // this test is to make sure the runtime check tested by scopeTest11 does not break inheritance
+        let container = new Container();        
+        container.registerInstance(Child, new DerivedDerivedChild());
+
+        let resolvedChild = container.resolve(Child);
+        
+        Expect(resolvedChild instanceof DerivedDerivedChild).toBe(true);   
     }
 }

@@ -106,6 +106,12 @@ export class Container {
             throw new Error(`Cannot register null or undefined as instance. Did you intend to call unregister?`);
         }
         
+        // this basically checks for "function" !== "object" e.g. if someone uses trivial types for registration 
+        // and passes in a factory function as "then" instead of a real instance (see explanation in unit tests).
+        if (typeof(then) !== typeof(when.prototype)) {
+            throw new Error(`You need to register an instance with the same type as the prototype of the source.`);
+        }
+
         this._providers.set(when, new InstanceRegistration<T>(then));
     }
 
