@@ -95,4 +95,56 @@ export class ScopeTests {
 
         Expect(child1).toEqual(child2);
     }
+
+    @Test("resolving registered by factory should use the factory")
+    public scopeTest8() {
+        let container = new Container();
+        let wasCalled = false;
+
+        let factory = () => {
+            wasCalled = true;
+            return new Child();
+        };
+
+        container.registerFactory(Child, factory);
+        let child = container.resolve(Child);
+
+        Expect(wasCalled).toBe(true);
+    }
+
+    @Test("resolving registered by factory should return the factory result")
+    public scopeTest9() {
+        let container = new Container();
+        let child = new Child();
+
+        let factory = () => child;
+
+        container.registerFactory(Child, factory);
+        let child1 = container.resolve(Child);
+
+        Expect(child1).toEqual(child);
+    }
+
+    @Test("resolving registered by factory should return the factory result 2")
+    public scopeTest10() {
+        let container = new Container();
+        let child1 = new Child();
+        let child2 = new Child();
+        let flip = false;
+
+        let factory = () => {
+            flip = !flip;
+            return flip ? child1 : child2;
+        };
+
+        container.registerFactory(Child, factory);
+        let returnedChild1 = container.resolve(Child);
+        let returnedChild2 = container.resolve(Child);
+        let returnedChild3 = container.resolve(Child);
+
+        Expect(returnedChild1).not.toEqual(returnedChild2);
+        Expect(returnedChild1).toEqual(returnedChild3);
+        Expect(returnedChild1).toEqual(child1);
+        Expect(returnedChild2).toEqual(child2);
+    }
 }

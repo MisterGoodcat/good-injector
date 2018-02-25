@@ -4,6 +4,7 @@ import "reflect-metadata";
 
 export type Constructor<T> = Function & { prototype: T }; // this describes an abstract class constructor
 export interface IConcreteConstructor<T> { new(...args: any[]): T; }
+export type FactoryFunction<T> = () => T;
 
 export function SupportsInjection<T extends { new(...args: any[]): {} }>(constructor: T) {
     // tslint:disable-next-line:no-empty => decorator has no content but still does its magic
@@ -53,6 +54,15 @@ class InstanceRegistration<T> implements ITypedRegistration<T> {
     }
 }
 
+class FactoryRegistration<T> implements ITypedRegistration<T> {
+    constructor(private _factory: FactoryFunction<T>) {        
+    }
+
+    public resolve(argumentBuilder: (type: IConcreteConstructor<T>) => any[]): T {
+        return this._factory();
+    }
+}
+
 export class Container {
     private _parameterTypes: Map<Function, any[]> = new Map<Function, any[]>();
     private _providers: Map<Function, IRegistration> = new Map<Function, IRegistration>();
@@ -97,6 +107,14 @@ export class Container {
         }
         
         this._providers.set(when, new InstanceRegistration<T>(then));
+    }
+
+    public registerFactory<T>(when: Constructor<T>, then: FactoryFunction<T>) {
+        if (then == undefined) {
+            throw new Error(`Cannot register null or undefined as factory. Did you intend to call unregister?`);
+        }
+
+        this._providers.set(when, new FactoryRegistration<T>(then));
     }
 
     public unregister<T>(type: Constructor<T>): void {

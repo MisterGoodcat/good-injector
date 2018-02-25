@@ -31,4 +31,13 @@ export class ScopeTests {
                 
         Expect(() => container.resolve(Child)).toThrow();
     }
+
+    @Test("when registered as factory and unregistered, it should throw on resolve")
+    public scopeTest4() {
+        let container = new Container();
+        container.registerFactory(Child, () => new Child());
+        container.unregister(Child);
+                
+        Expect(() => container.resolve(Child)).toThrow();
+    }
 }
