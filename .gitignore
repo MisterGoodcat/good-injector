@@ -1,5 +1,6 @@
 dist/
 node_modules/
+tests-outdir/
 
 *.tgz
 npm-debug.log

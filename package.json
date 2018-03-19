@@ -20,12 +20,14 @@
   "scripts": {
     "clean:dist": "rimraf ./dist/**/*.*",
     "compile:src": "tsc -p ./tsconfig.json",
+    "compile:tests": "tsc -p ./tests/tsconfig.json",
     "lint:dev": "tslint --force --format stylish ./src/**/*.ts",
     "lint:prod": "tslint --format stylish ./src/**/*.ts",
     "lint-fix:dev": "tslint --fix --format stylish ./src/**/*.ts",
     "build:dev": "npm run clean:dist && npm run compile:src && npm run lint:dev && npm run test",
     "build:prod": "npm run clean:dist && npm run compile:src && npm run lint:prod && npm run test",
     "test": "ts-node --project ./tests/tsconfig.json ./tests/Runner.ts",
+    "test:debug": "tsc -p ./tests/tsconfig.json && node --nolazy --inspect-brk=9229 ./node_modules/alsatian/cli/alsatian-cli.js ./tests-outdir/**/*.spec.js",
     "watch:dev": "tsc-watch -p ./tsconfig.json --onSuccess \"npm run lint:dev\"",
     "watch:tests": "tsc-watch -p ./tests/tsconfig.json --onSuccess \"npm run test\""
   },
